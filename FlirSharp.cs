@@ -340,15 +340,21 @@ namespace FlirSharp
         {
             // Analisa os dados para detectar se é PNG
             stream.Position = metadata.offset + 32;
-            var headerBytes = new byte[20];
+            var headerBytes = new byte[100]; // Lê mais bytes para encontrar IHDR
             stream.Read(headerBytes, 0, headerBytes.Length);
 
-            // Procura por assinatura PNG
+            // Procura por assinatura PNG (pode estar truncada no FLIR)
             bool isPng = false;
             for (int i = 0; i < headerBytes.Length - 4; i++)
             {
                 if (headerBytes[i] == 0x89 && headerBytes[i + 1] == 0x50 &&
                     headerBytes[i + 2] == 0x4E && headerBytes[i + 3] == 0x47)
+                {
+                    isPng = true;
+                    break;
+                }
+                // FLIR PNG truncado começando com "NG": 4E 47
+                else if (headerBytes[i] == 0x4E && headerBytes[i + 1] == 0x47)
                 {
                     isPng = true;
                     break;
@@ -373,20 +379,20 @@ namespace FlirSharp
 
             if (isPng)
             {
-                // Extrai dimensões do header IHDR do PNG
+                // Para PNG, extrai dimensões do header IHDR
+                // IHDR: 4 bytes length + 4 bytes "IHDR" + 4 bytes width + 4 bytes height
                 for (int i = 0; i < headerBytes.Length - 12; i++)
                 {
                     if (headerBytes[i] == 0x49 && headerBytes[i + 1] == 0x48 &&
                         headerBytes[i + 2] == 0x44 && headerBytes[i + 3] == 0x52)
                     {
-                        // Encontrou IHDR, extrai dimensões
+                        // Encontrou IHDR, extrai dimensões (big-endian)
                         if (i + 11 < headerBytes.Length)
                         {
                             width = (headerBytes[i + 4] << 24) | (headerBytes[i + 5] << 16) |
                                    (headerBytes[i + 6] << 8) | headerBytes[i + 7];
                             height = (headerBytes[i + 8] << 24) | (headerBytes[i + 9] << 16) |
                                     (headerBytes[i + 10] << 8) | headerBytes[i + 11];
-                            Console.WriteLine($"    Debug: PNG dimensions from IHDR: {width}x{height}");
                             break;
                         }
                     }
@@ -398,7 +404,7 @@ namespace FlirSharp
                 stream.Position = metadata.offset + 2;
                 var dimensionBytes = new byte[4];
                 stream.Read(dimensionBytes, 0, 4);
-
+                
                 width = BitConverter.ToUInt16(dimensionBytes, 0);
                 height = BitConverter.ToUInt16(dimensionBytes, 2);
             }
@@ -434,7 +440,6 @@ namespace FlirSharp
 
             if (isPngData)
             {
-                Console.WriteLine($"    Debug: ✅ Detected PNG thermal data");
                 // TODO: CRÍTICO - Implementar descompressão PNG
                 // Os dados térmicos FLIR estão comprimidos em PNG!
                 // Precisa usar biblioteca de imagem para:
