@@ -1,0 +1,57 @@
+# .NET build outputs
+bin/
+obj/
+
+# IDE and editor files
+.vs/
+.vscode/
+*.user
+*.userosscache
+*.sln.docstates
+.idea/
+
+# Build results
+[Dd]ebug/
+[Dd]ebugPublic/
+[Rr]elease/
+[Rr]eleases/
+x64/
+x86/
+bld/
+[Bb]in/
+[Oo]bj/
+[Ll]og/
+
+# NuGet packages
+*.nupkg
+packages/
+.nuget/
+
+# Test results
+[Tt]est[Rr]esult*/
+[Bb]uild[Ll]og.*
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Application specific
+input_images/
+extracted_thermal_data/
+*.jpg
+*.jpeg
+*.png
+
+# Temporary/cache files
+*.tmp
+*.cache
+
+# Python files (legacy/reference)
+*.py
+__pycache__/
+*.pyc
