@@ -330,8 +330,7 @@ namespace FlirSharp
                 thermogram.Measurements = ParseMeasurements(stream, records[(int)RecordIndex.MEASUREMENT_INFO]);
             }
 
-            // Converte para Celsius
-            thermogram.ConvertToCelsius();
+            // Note: ConvertToCelsius() must be called manually after ensuring camera info is available
 
             return thermogram;
         }
@@ -476,9 +475,7 @@ namespace FlirSharp
             }
 
             return (width, height, thermalData);
-        }
-
-        private Dictionary<string, float> ParseCameraInfo(Stream stream, (int entry, int type, int offset, int length) metadata)
+        }        private Dictionary<string, float> ParseCameraInfo(Stream stream, (int entry, int type, int offset, int length) metadata)
         {
             var cameraInfo = new Dictionary<string, float>();
 
@@ -487,11 +484,9 @@ namespace FlirSharp
             // The binary format contains camera parameters like emissivity, reflection temperature,
             // atmospheric temperature, distance, humidity, and Planck coefficients for temperature conversion.
             // See Python flyr library for reference implementation.
-
-            throw new NotImplementedException(
-                "Camera info parsing is not yet implemented. " +
-                "Temperature conversion requires Planck coefficients from camera metadata. " +
-                "Contributions welcome - see README.md for details.");
+            
+            // Return empty dictionary - temperature conversion will fail when attempted
+            return cameraInfo;
         }
 
         private List<Measurement> ParseMeasurements(Stream stream, (int entry, int type, int offset, int length) metadata)
